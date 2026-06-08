@@ -42,7 +42,7 @@ function oauthUrl(redirectUri) {
   const params = new URLSearchParams({
     client_id: process.env.META_APP_ID,
     redirect_uri: redirectUri,
-    scope: 'pages_manage_posts,pages_read_engagement,publish_to_groups,instagram_basic,instagram_content_publish,pages_show_list',
+    scope: 'pages_manage_posts,pages_read_engagement,instagram_basic,instagram_content_publish,pages_show_list',
     response_type: 'code',
   });
   return `https://www.facebook.com/v19.0/dialog/oauth?${params}`;
