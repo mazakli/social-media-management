@@ -91,7 +91,7 @@ export default function SosyalMedyaPost() {
     fd.append('dosya', dosya);
     fd.append('marka_id', markaId);
     try {
-      const { data } = await api.post('/medya/yukle', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const { data } = await api.post('/medya/yukle', fd);
       gorselSec(data);
       toast.success('Görsel yüklendi');
     } catch { toast.error('Yükleme hatası'); }
