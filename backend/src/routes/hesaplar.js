@@ -39,7 +39,8 @@ router.get('/oauth-url/:platform', authMiddleware, async (req, res) => {
     const redirectUri = `${REDIRECT_BASE}/api/hesaplar/callback/${platform}`;
 
     if (platform === 'facebook' || platform === 'instagram') {
-      url = facebook.oauthUrl(redirectUri);
+      oauthDurumlari.set(state, { marka_id, kullanici_id: req.kullanici.id });
+      url = facebook.oauthUrl(redirectUri, state);
     } else if (platform === 'twitter') {
       const codeVerifier = twitter.codeVerifierUret();
       oauthDurumlari.set(state, { codeVerifier, marka_id, kullanici_id: req.kullanici.id });
@@ -52,11 +53,6 @@ router.get('/oauth-url/:platform', authMiddleware, async (req, res) => {
       url = youtube.oauthUrl(redirectUri, state);
     } else {
       return res.status(400).json({ hata: 'Geçersiz platform' });
-    }
-
-    // Facebook için state'i sakla
-    if (platform === 'facebook' || platform === 'instagram') {
-      oauthDurumlari.set(state, { marka_id, kullanici_id: req.kullanici.id });
     }
 
     res.json({ url, state });
