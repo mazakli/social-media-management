@@ -163,10 +163,10 @@ router.get('/callback/twitter', async (req, res) => {
       [durum.marka_id, hesapAdi, hesapId, tokenData.access_token, tokenData.refresh_token, tokenBitis, profilResim]
     );
 
-    res.redirect(`${REDIRECT_BASE}/hesaplar?twitter=basarili`);
+    res.send('<script>if(window.opener){window.opener.postMessage({basarili:true,platform:"twitter"},"*");window.close();}else{window.location.href="/hesaplar?twitter=basarili";}</script>');
   } catch (err) {
     console.error('Twitter callback hatası:', err.message);
-    res.redirect(`${REDIRECT_BASE}/hesaplar?twitter_hata=${encodeURIComponent(err.message)}`);
+    res.send(`<script>if(window.opener){window.opener.postMessage({hata:"${err.message.replace(/"/g,'').replace(/\n/g,'')}"},"*");window.close();}else{window.location.href="/hesaplar?twitter_hata=${encodeURIComponent(err.message)}"}</script>`);
   }
 });
 

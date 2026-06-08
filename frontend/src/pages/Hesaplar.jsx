@@ -162,10 +162,10 @@ export default function SosyalMedyaHesaplar() {
     setBaglaniyorPlatform(platform);
     try {
       const { data } = await api.get(`/hesaplar/oauth-url/${platform}?marka_id=${markaId}`);
-      // Twitter için tam sayfa yönlendirme (cookie sorunu nedeniyle popup çalışmıyor)
+      // Twitter için yeni sekme aç
       if (platform === 'twitter') {
-        localStorage.setItem('oauth_donus_sayfasi', '/hesaplar');
-        window.location.href = data.url;
+        window.open(data.url, '_blank');
+        setBaglaniyorPlatform(null);
         return;
       }
       const popup = window.open(data.url, 'oauth', 'width=600,height=700,scrollbars=yes');
