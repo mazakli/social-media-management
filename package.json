@@ -1,0 +1,8 @@
+{
+  "name": "sosyal-medya-panel",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build && cd .. && mkdir -p backend/public && cp -r frontend/dist/. backend/public/ && cd backend && npm install",
+    "start": "node backend/src/index.js"
+  }
+}
