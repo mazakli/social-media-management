@@ -131,17 +131,18 @@ router.get('/callback/twitter', async (req, res) => {
   try {
     const redirectUri = `${REDIRECT_BASE}/api/hesaplar/callback/twitter`;
     const tokenData = await twitter.tokenAl(code, redirectUri, durum.codeVerifier);
+    console.log('Twitter token yanıtı:', JSON.stringify(tokenData));
     if (tokenData.error) throw new Error(tokenData.error_description || tokenData.error);
+    if (!tokenData.access_token) throw new Error('Token alınamadı: ' + JSON.stringify(tokenData));
 
     const kullaniciData = await twitter.kullaniciBilgi(tokenData.access_token);
+    console.log('Twitter kullanıcı:', JSON.stringify(kullaniciData));
     const tokenBitis = tokenData.expires_in ? new Date(Date.now() + tokenData.expires_in * 1000) : null;
 
     await pool.query(
       `INSERT INTO sm_hesaplar (marka_id, platform, hesap_adi, hesap_id, erisim_token, yenileme_token, token_bitis, profil_resim)
        VALUES ($1,'twitter',$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (marka_id, platform) DO UPDATE SET
-         erisim_token=EXCLUDED.erisim_token, yenileme_token=EXCLUDED.yenileme_token,
-         token_bitis=EXCLUDED.token_bitis, guncellendi=NOW()`,
+       ON CONFLICT DO NOTHING`,
       [durum.marka_id, `@${kullaniciData.username}`, kullaniciData.id,
        tokenData.access_token, tokenData.refresh_token, tokenBitis, kullaniciData.profile_image_url || null]
     );
