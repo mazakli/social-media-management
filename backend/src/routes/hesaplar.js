@@ -135,16 +135,27 @@ router.get('/callback/twitter', async (req, res) => {
     if (tokenData.error) throw new Error(tokenData.error_description || tokenData.error);
     if (!tokenData.access_token) throw new Error('Token alınamadı: ' + JSON.stringify(tokenData));
 
-    const kullaniciData = await twitter.kullaniciBilgi(tokenData.access_token);
-    console.log('Twitter kullanıcı:', JSON.stringify(kullaniciData));
     const tokenBitis = tokenData.expires_in ? new Date(Date.now() + tokenData.expires_in * 1000) : null;
+
+    // Kullanıcı bilgisini almayı dene, başarısız olursa token'ı yine kaydet
+    let hesapAdi = 'Twitter Hesabı';
+    let hesapId = 'twitter_' + Date.now();
+    let profilResim = null;
+    try {
+      const kullaniciData = await twitter.kullaniciBilgi(tokenData.access_token);
+      console.log('Twitter kullanıcı:', JSON.stringify(kullaniciData));
+      hesapAdi = `@${kullaniciData.username}`;
+      hesapId = kullaniciData.id;
+      profilResim = kullaniciData.profile_image_url || null;
+    } catch (e) {
+      console.log('Kullanıcı bilgisi alınamadı, devam ediliyor:', e.message);
+    }
 
     await pool.query(
       `INSERT INTO sm_hesaplar (marka_id, platform, hesap_adi, hesap_id, erisim_token, yenileme_token, token_bitis, profil_resim)
        VALUES ($1,'twitter',$2,$3,$4,$5,$6,$7)
        ON CONFLICT DO NOTHING`,
-      [durum.marka_id, `@${kullaniciData.username}`, kullaniciData.id,
-       tokenData.access_token, tokenData.refresh_token, tokenBitis, kullaniciData.profile_image_url || null]
+      [durum.marka_id, hesapAdi, hesapId, tokenData.access_token, tokenData.refresh_token, tokenBitis, profilResim]
     );
 
     res.send('<script>window.opener?.postMessage({basarili:true,platform:"twitter"},"*");window.close();</script>');
