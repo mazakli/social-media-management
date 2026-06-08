@@ -1,12 +1,11 @@
 const { Pool } = require('pg');
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
-});
-
 async function migrate() {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  });
   const client = await pool.connect();
   try {
     console.log('Tablolar oluşturuluyor...');
@@ -131,4 +130,9 @@ async function migrate() {
   }
 }
 
-migrate();
+// Doğrudan çalıştırıldığında migrate et
+if (require.main === module) {
+  migrate().then(() => process.exit(0)).catch(() => process.exit(1));
+}
+
+module.exports = migrate;
