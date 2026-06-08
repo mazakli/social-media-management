@@ -43,8 +43,9 @@ router.get('/oauth-url/:platform', authMiddleware, async (req, res) => {
       url = facebook.oauthUrl(redirectUri, state);
     } else if (platform === 'twitter') {
       const codeVerifier = twitter.codeVerifierUret();
-      oauthDurumlari.set(state, { codeVerifier, marka_id, kullanici_id: req.kullanici.id });
-      url = twitter.oauthUrl(redirectUri, state, codeVerifier);
+      // State içine codeVerifier ve marka_id encode et (in-memory Map'e bağımlılığı ortadan kaldır)
+      const twitterState = Buffer.from(JSON.stringify({ codeVerifier, marka_id, kullanici_id: req.kullanici.id })).toString('base64url');
+      url = twitter.oauthUrl(redirectUri, twitterState, codeVerifier);
     } else if (platform === 'pinterest') {
       oauthDurumlari.set(state, { marka_id, kullanici_id: req.kullanici.id });
       url = pinterest.oauthUrl(redirectUri, state);
@@ -122,11 +123,15 @@ router.get('/callback/instagram', (req, res) => {
 // OAuth Callback — Twitter
 router.get('/callback/twitter', async (req, res) => {
   const { code, state, error } = req.query;
-  if (error) return res.send(`<script>window.opener?.postMessage({hata:'${error}'},'*');window.close();</script>`);
+  if (error) return res.redirect(`${REDIRECT_BASE}/hesaplar?twitter_hata=${encodeURIComponent(error)}`);
 
-  const durum = oauthDurumlari.get(state);
-  if (!durum) return res.send('<script>window.opener?.postMessage({hata:"Geçersiz state"},"*");window.close();</script>');
-  oauthDurumlari.delete(state);
+  // State'i decode et (base64url → JSON)
+  let durum;
+  try {
+    durum = JSON.parse(Buffer.from(state, 'base64url').toString());
+  } catch (e) {
+    return res.redirect(`${REDIRECT_BASE}/hesaplar?twitter_hata=Geçersiz+state`);
+  }
 
   try {
     const redirectUri = `${REDIRECT_BASE}/api/hesaplar/callback/twitter`;
