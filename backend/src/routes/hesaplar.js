@@ -190,9 +190,7 @@ router.get('/callback/pinterest', async (req, res) => {
     await pool.query(
       `INSERT INTO sm_hesaplar (marka_id, platform, hesap_adi, hesap_id, erisim_token, yenileme_token, token_bitis, profil_resim)
        VALUES ($1,'pinterest',$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (marka_id, platform) DO UPDATE SET
-         erisim_token=EXCLUDED.erisim_token, yenileme_token=EXCLUDED.yenileme_token,
-         token_bitis=EXCLUDED.token_bitis, guncellendi=NOW()`,
+       ON CONFLICT DO NOTHING`,
       [durum.marka_id, kullanici.username || kullanici.business_name, kullanici.account_id || kullanici.username,
        tokenData.access_token, tokenData.refresh_token, tokenBitis, kullanici.profile_image || null]
     );
@@ -223,9 +221,7 @@ router.get('/callback/youtube', async (req, res) => {
     await pool.query(
       `INSERT INTO sm_hesaplar (marka_id, platform, hesap_adi, hesap_id, erisim_token, yenileme_token, token_bitis, profil_resim)
        VALUES ($1,'youtube',$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (marka_id, platform) DO UPDATE SET
-         erisim_token=EXCLUDED.erisim_token, yenileme_token=EXCLUDED.yenileme_token,
-         token_bitis=EXCLUDED.token_bitis, guncellendi=NOW()`,
+       ON CONFLICT DO NOTHING`,
       [durum.marka_id, kanal.adi, kanal.id, tokenData.access_token, tokenData.refresh_token, tokenBitis, kanal.profil_resim || null]
     );
 
