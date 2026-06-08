@@ -120,6 +120,18 @@ export default function SosyalMedyaHesaplar() {
   }, []);
 
   useEffect(() => {
+    // Twitter tam sayfa redirect sonucu kontrol et
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('twitter') === 'basarili') {
+      toast.success('Twitter hesabı bağlandı!');
+      window.history.replaceState({}, '', '/hesaplar');
+    } else if (params.get('twitter_hata')) {
+      toast.error('Twitter hatası: ' + params.get('twitter_hata'));
+      window.history.replaceState({}, '', '/hesaplar');
+    }
+  }, []);
+
+  useEffect(() => {
     if (markaId) yukle();
     // OAuth popup mesajlarını dinle
     const handler = (e) => {
@@ -150,6 +162,12 @@ export default function SosyalMedyaHesaplar() {
     setBaglaniyorPlatform(platform);
     try {
       const { data } = await api.get(`/hesaplar/oauth-url/${platform}?marka_id=${markaId}`);
+      // Twitter için tam sayfa yönlendirme (cookie sorunu nedeniyle popup çalışmıyor)
+      if (platform === 'twitter') {
+        localStorage.setItem('oauth_donus_sayfasi', '/hesaplar');
+        window.location.href = data.url;
+        return;
+      }
       const popup = window.open(data.url, 'oauth', 'width=600,height=700,scrollbars=yes');
       if (!popup) {
         toast.error('Popup engellendi. Tarayıcı popup izinlerini kontrol edin.');
