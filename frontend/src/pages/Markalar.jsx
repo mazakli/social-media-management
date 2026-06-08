@@ -93,7 +93,7 @@ export default function Markalar() {
                   <div style={{ fontSize: 12, color: '#94a3b8' }}>/{m.slug}</div>
                 </div>
                 <div style={{ marginLeft: 'auto' }}>
-                  <span style={{ ...s.badge, background: m.aktif ? '#dcfce7', color: '#16a34a' }}>
+                  <span style={{ ...s.badge, background: m.aktif ? '#dcfce7' : '#fee2e2', color: m.aktif ? '#16a34a' : '#dc2626' }}>
                     {m.aktif ? 'Aktif' : 'Pasif'}
                   </span>
                 </div>
