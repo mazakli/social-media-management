@@ -44,7 +44,7 @@ function oauthUrl(redirectUri, state) {
     client_id: process.env.PINTEREST_APP_ID,
     redirect_uri: redirectUri,
     response_type: 'code',
-    scope: 'boards:read,boards:write,pins:read,pins:write',
+    scope: 'boards:read,boards:write,pins:read,pins:write,user_accounts:read',
     state,
   });
   return `https://www.pinterest.com/oauth/?${params}`;
