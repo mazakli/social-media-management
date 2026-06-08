@@ -56,7 +56,7 @@ function oauthUrl(redirectUri, state, codeVerifier) {
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',
   });
-  return `${API_BASE}/2/oauth2/authorize?${params}`;
+  return `https://twitter.com/i/oauth2/authorize?${params}`;
 }
 
 // Code → token
