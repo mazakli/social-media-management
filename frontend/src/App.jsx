@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Post from './pages/Post';
 import Hesaplar from './pages/Hesaplar';
 import Highlights from './pages/Highlights';
+import Markalar from './pages/Markalar';
 
 function KorunanRotalar() {
   const { kullanici, yukleniyor } = useAuth();
@@ -24,6 +25,7 @@ function KorunanRotalar() {
         <Route path="/post/:id" element={<Post />} />
         <Route path="/hesaplar" element={<Hesaplar />} />
         <Route path="/highlights" element={<Highlights />} />
+        <Route path="/markalar" element={<Markalar />} />
       </Routes>
     </Layout>
   );

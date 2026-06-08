@@ -105,11 +105,22 @@ export default function SosyalMedyaHesaplar() {
   const [fbSayfaModal, setFbSayfaModal] = useState(null);
   const [pinterestBoardModal, setPinterestBoardModal] = useState(null);
   const [pinterestBoardlar, setPinterestBoardlar] = useState([]);
+  const [markalar, setMarkalar] = useState([]);
+  const [secilenMarkaId, setSecilenMarkaId] = useState(kullanici?.marka_id || null);
 
-  const markaId = kullanici?.marka_id;
+  const markaId = secilenMarkaId;
 
   useEffect(() => {
-    yukle();
+    if (kullanici?.rol === 'superadmin') {
+      api.get('/markalar').then(({ data }) => {
+        setMarkalar(data);
+        if (!secilenMarkaId && data.length > 0) setSecilenMarkaId(data[0].id);
+      }).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    if (markaId) yukle();
     // OAuth popup mesajlarını dinle
     const handler = (e) => {
       if (e.data?.basarili) {
@@ -123,7 +134,7 @@ export default function SosyalMedyaHesaplar() {
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, []);
+  }, [markaId]);
 
   async function yukle() {
     setYukleniyor(true);
@@ -213,14 +224,26 @@ export default function SosyalMedyaHesaplar() {
         <button onClick={() => navigate('/')} style={styles.geriBtn}>← Geri</button>
       </div>
 
-      {/* .env Uyarısı */}
-      <div style={styles.uyari}>
-        <span style={{ fontSize: 20 }}>⚙️</span>
-        <div>
-          <strong>Kurulum gerekli:</strong> Her platform için API anahtarları .env dosyasına eklenmelidir.
-          Bir platforma tıklayarak kurulum kılavuzunu görüntüleyin.
+      {/* Marka Seçici (Superadmin) */}
+      {kullanici?.rol === 'superadmin' && markalar.length > 0 && (
+        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <label style={{ fontWeight: 600, color: '#374151', fontSize: 14 }}>Marka:</label>
+          <select
+            value={secilenMarkaId || ''}
+            onChange={e => setSecilenMarkaId(Number(e.target.value))}
+            style={{ padding: '8px 12px', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none' }}
+          >
+            {markalar.map(m => <option key={m.id} value={m.id}>{m.ad}</option>)}
+          </select>
         </div>
-      </div>
+      )}
+
+      {!markaId && (
+        <div style={{ ...styles.uyari, background: '#fef3c7', borderColor: '#fbbf24' }}>
+          <span style={{ fontSize: 20 }}>⚠️</span>
+          <div>Önce <a href="/markalar" style={{ color: '#d97706', fontWeight: 600 }}>Markalar</a> sayfasından bir marka oluşturun.</div>
+        </div>
+      )}
 
       <div style={styles.grid}>
         {PLATFORMLAR.map(p => {
