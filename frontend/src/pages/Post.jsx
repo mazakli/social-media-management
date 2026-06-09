@@ -94,7 +94,7 @@ export default function SosyalMedyaPost() {
       const { data } = await api.post('/medya/yukle', fd);
       gorselSec(data);
       toast.success('Görsel yüklendi');
-    } catch { toast.error('Yükleme hatası'); }
+    } catch (err) { toast.error(err.response?.data?.hata || err.message || 'Yükleme hatası'); }
   }
 
   async function medyaListeYukle() {
