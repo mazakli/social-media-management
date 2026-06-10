@@ -39,10 +39,22 @@ export default function SosyalMedyaPost() {
   const [kaydiyor, setKaydiyor] = useState(false);
   const [yayinliyor, setYayinliyor] = useState(false);
   const [aktifOnizleme, setAktifOnizleme] = useState('instagram');
+  const [markalar, setMarkalar] = useState([]);
+  const [secilenMarkaId, setSecilenMarkaId] = useState(kullanici?.marka_id || null);
 
-  const markaId = kullanici?.marka_id;
+  const markaId = secilenMarkaId;
 
   useEffect(() => {
+    if (kullanici?.rol === 'superadmin') {
+      api.get('/markalar').then(({ data }) => {
+        setMarkalar(data);
+        if (!secilenMarkaId && data.length > 0) setSecilenMarkaId(data[0].id);
+      }).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!markaId) return;
     api.get(`/hesaplar?marka_id=${markaId}`).then(r => setHesaplar(r.data)).catch(() => {});
     if (duzenleModu) {
       api.get(`/postlar/${id}`).then(r => {
@@ -160,6 +172,16 @@ export default function SosyalMedyaPost() {
           </button>
         </div>
       </div>
+
+      {kullanici?.rol === 'superadmin' && markalar.length > 0 && (
+        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <label style={{ fontWeight: 600, color: '#374151', fontSize: 14 }}>Marka:</label>
+          <select value={secilenMarkaId || ''} onChange={e => setSecilenMarkaId(Number(e.target.value))}
+            style={{ padding: '8px 12px', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: 14 }}>
+            {markalar.map(m => <option key={m.id} value={m.id}>{m.ad}</option>)}
+          </select>
+        </div>
+      )}
 
       <div style={styles.icerik}>
         {/* Sol — Form */}

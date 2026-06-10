@@ -21,11 +21,11 @@ const upload = multer({
 
 router.post('/yukle', authMiddleware, upload.single('dosya'), async (req, res) => {
   if (!req.file) return res.status(400).json({ hata: 'Dosya seçilmedi' });
-  const { marka_id } = req.body;
+  const markaId = parseInt(req.body.marka_id) || null;
   try {
     const result = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: `sm/${marka_id || 'genel'}`, resource_type: 'auto' },
+        { folder: `sm/${markaId || 'genel'}`, resource_type: 'auto' },
         (err, result) => err ? reject(err) : resolve(result)
       ).end(req.file.buffer);
     });
@@ -33,7 +33,7 @@ router.post('/yukle', authMiddleware, upload.single('dosya'), async (req, res) =
     const { rows } = await pool.query(
       `INSERT INTO medyalar (marka_id, dosya_adi, url, cloudinary_id, tur, boyut, genislik, yukseklik)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [marka_id || null, req.file.originalname, result.secure_url, result.public_id,
+      [markaId, req.file.originalname, result.secure_url, result.public_id,
        tur, req.file.size, result.width || null, result.height || null]
     );
     res.json(rows[0]);
